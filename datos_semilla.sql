@@ -1,5 +1,5 @@
 INSERT INTO categorias (nombre,descripcion,estado,fecha_creacion) VALUES ('Útiles de oficina','Papelería y útiles de escritorio',1,CURRENT_TIMESTAMP);
-git statusINSERT INTO categorias (nombre,descripcion,estado,fecha_creacion) VALUES ('Limpieza','Artículos de limpieza e higiene',1,CURRENT_TIMESTAMP);
+INSERT INTO categorias (nombre,descripcion,estado,fecha_creacion) VALUES ('Limpieza','Artículos de limpieza e higiene',1,CURRENT_TIMESTAMP);
 INSERT INTO categorias (nombre,descripcion,estado,fecha_creacion) VALUES ('Tecnología','Suministros y periféricos',1,CURRENT_TIMESTAMP);
 INSERT INTO productos (codigo,nombre,costo_unitario,stock,stock_minimo,estado,categoria_id,fecha_creacion) SELECT 'OFI-001','Papel bond A4 x 500 hojas',18.50,120,20,1,id,CURRENT_TIMESTAMP FROM categorias WHERE nombre='Útiles de oficina';
 INSERT INTO productos (codigo,nombre,costo_unitario,stock,stock_minimo,estado,categoria_id,fecha_creacion) SELECT 'OFI-002','Lapicero azul caja x 12',9,40,10,1,id,CURRENT_TIMESTAMP FROM categorias WHERE nombre='Útiles de oficina';

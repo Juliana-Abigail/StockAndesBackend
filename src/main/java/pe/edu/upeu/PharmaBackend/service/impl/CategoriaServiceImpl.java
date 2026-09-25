@@ -1,106 +1,74 @@
 package pe.edu.upeu.PharmaBackend.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import pe.edu.upeu.PharmaBackend.dto.CategoriaRequestDTO;
-import pe.edu.upeu.PharmaBackend.dto.CategoriaResponseDTO;
+import pe.edu.upeu.PharmaBackend.dto.*;
 import pe.edu.upeu.PharmaBackend.entity.Categoria;
-import pe.edu.upeu.PharmaBackend.exception.RecursosNoEncontradoException;
-import pe.edu.upeu.PharmaBackend.exception.ReglaNegocioException;
-import pe.edu.upeu.PharmaBackend.repository.CategoriaRepository;
+import pe.edu.upeu.PharmaBackend.exception.*;
+import pe.edu.upeu.PharmaBackend.repository.*;
 import pe.edu.upeu.PharmaBackend.service.service.CategoriaService;
-
-import java.util.Optional;
+import java.util.*;
 
 @Service
+
+@Slf4j
+
 public class CategoriaServiceImpl implements CategoriaService {
-    private static final Logger LOG = LoggerFactory.getLogger(CategoriaServiceImpl.class);
+    private final CategoriaRepository repo;
+    private final ProductoRepository productos;
 
-    private final CategoriaRepository categoriaRepository;
-
-    public CategoriaServiceImpl(CategoriaRepository categoriaRepository) {
-        this.categoriaRepository = categoriaRepository;
+    public CategoriaServiceImpl(CategoriaRepository r, ProductoRepository p) {
+        repo = r;
+        productos = p;
     }
 
-    @Override
-    @Transactional
-    public CategoriaResponseDTO create(CategoriaRequestDTO t) {
-        String nombre = t.getNombre().trim();
-        if(categoriaRepository.existsByNombreIgnoreCase(nombre)){
-            throw new ReglaNegocioException(
-                    "Ya existe una categoria con el nombre " + nombre
-            );
-        }
-
-        Categoria categoria = new Categoria();
-        categoria.setNombre(nombre);
-        categoria.setDescripcion(t.getDescripcion());
-        categoria.setEstado(t.getEstado());
-
-        Categoria catCreada = categoriaRepository.save(categoria);
-
-        return convertirResponse(catCreada);
+    private String norm(String s) {
+        return s==null?null:s.trim().replaceAll("\\s+", " ");
     }
 
-    @Override
-    @Transactional
-    public CategoriaResponseDTO update(Long aLong, CategoriaRequestDTO t) {
-        Categoria categoria = categoriaRepository.findById(aLong).orElseThrow(()->
-                new RecursosNoEncontradoException(
-                        "Categoria no encontrada con id: "+ aLong
-                )
-        );
-        categoria.setNombre(t.getNombre());
-        categoria.setDescripcion(t.getDescripcion());
-        categoria.setEstado(t.getEstado());
-
-        Categoria catActualizada = categoriaRepository.save(categoria);
-
-        return convertirResponse(catActualizada);
+    private CategoriaResponseDTO dto(Categoria c) {
+        return new CategoriaResponseDTO(c.getId(), c.getNombre(), c.getDescripcion(), c.getEstado(), c.getFechaCreacion(), c.getFechaModificacion());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public CategoriaResponseDTO read(Long aLong) {
-        Categoria categoria = categoriaRepository.findById(aLong)
-                .orElseThrow(()->
-                        new RecursosNoEncontradoException(
-                                "Categoria no encontrada con id: "+ aLong
-                        )
-                );
-        return convertirResponse(categoria);
+    public CategoriaResponseDTO create(CategoriaRequestDTO r) {
+        r.setNombre(norm(r.getNombre()));
+        if (repo.existsByNombreIgnoreCase(r.getNombre())) throw new ReglaNegocioException("Ya existe una categoria con ese nombre");
+        Categoria c = new Categoria();
+        c.setNombre(r.getNombre());
+        c.setDescripcion(r.getDescripcion());
+        c.setEstado(r.getEstado());
+        c = repo.save(c);
+        log.info("Categoria creada id = {}", c.getId());
+        return dto(c);
     }
 
-    @Override
-    @Transactional
-    public void delete(Long aLong) {
-        Categoria categoria = categoriaRepository.findById(aLong).orElseThrow(()->
-                new RecursosNoEncontradoException(
-                        "Categoria no encontrada con id: "+ aLong
-                )
-        );
-        categoriaRepository.delete(categoria);
+    public CategoriaResponseDTO update(Long id, CategoriaRequestDTO r) {
+        Categoria c = get(id);
+        r.setNombre(norm(r.getNombre()));
+        if (repo.existsByNombreIgnoreCaseAndIdNot(r.getNombre(), id))throw new ReglaNegocioException("Ya existe una categoria con ese nombre");
+        c.setNombre(r.getNombre());
+        c.setDescripcion(r.getDescripcion());
+        c.setEstado(r.getEstado());
+        log.info("Categoria actualizada id = {}", id);
+        return dto(repo.save(c));
     }
 
-    @Override
-    @Transactional(readOnly = true)
+    public CategoriaResponseDTO read(Long id) {
+        return dto(get(id));
+    }
+
+    public void delete(Long id) {
+        get(id);
+        if (productos.existsByCategoriaId(id))throw new ReglaNegocioException("No se puede eliminar una categoria con productos");
+        repo.deleteById(id);
+        log.info("Categoria eliminada id = {}", id);
+    }
+
     public Iterable<CategoriaResponseDTO> readAll() {
-        return categoriaRepository.findAll()
-                .stream()
-                .map(this::convertirResponse)
-                .toList();
+        return repo.findAll().stream().map(this::dto).toList();
     }
 
-    private CategoriaResponseDTO convertirResponse(Categoria categoria){
-        return new CategoriaResponseDTO(
-                categoria.getId(),
-                categoria.getNombre(),
-                categoria.getDescripcion(),
-                categoria.getEstado(),
-                categoria.getFechaCreacion(),
-                categoria.getFechaModificacion()
-        );
+    private Categoria get(Long id) {
+        return repo.findById(id).orElseThrow(()->new RecursosNoEncontradoException("Categoria no encontrada: "+id));
     }
 }

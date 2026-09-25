@@ -1,33 +1,16 @@
 package pe.edu.upeu.PharmaBackend.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
-public class CategoriaRequestDTO {
 
-    @NotBlank(message = "El nombre de la categoria es obligatorio")
-    @Size(
-            min = 3,
-            max = 50,
-            message = "El nombre debe tener entre 3 y 50 caracteres"
-    )
+@Setter @NoArgsConstructor @AllArgsConstructor public class CategoriaRequestDTO {
+    @NotBlank
+    @Size(min = 3, max = 60)
     private String nombre;
-
-    @Size(
-            max = 200,
-            message = "La descripcion no debe superar los 200 caracteres"
-    )
+    @Size(max = 200)
     private String descripcion;
-
-    @NotNull(message = "El estado es obligatorio")
+    @NotNull
     private Boolean estado;
 }

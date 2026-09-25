@@ -1,58 +1,29 @@
 package pe.edu.upeu.PharmaBackend.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import jakarta.validation.constraints.*;
+import lombok.*;
 import java.math.BigDecimal;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductoRequestDTO {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(
-            min = 3,
-            max = 150,
-            message = "El nombre debe tener entre 3 y 150 caracteres"
-    )
+@Setter @NoArgsConstructor @AllArgsConstructor public class ProductoRequestDTO {
+    @NotBlank
+    @Pattern(regexp = "^[A-Z]{3}-\\d{3}$", message = "El codigo debe cumplir AAA-999")
+    private String codigo;
+    @NotBlank
+    @Size(min = 3, max = 150)
     private String nombre;
-
-    @NotNull(message = "El precio es obligatorio")
-    @DecimalMin(
-            value = "0.01",
-            message = "El precio debe ser mayor que cero"
-    )
-    @Digits(
-            integer = 8,
-            fraction = 2,
-            message = "El precio debe tener máximo 8 enteros y 2 decimales"
-    )
-    private BigDecimal precio;
-
-    @NotNull(message = "El stock es obligatorio")
-    @Min(
-            value = 0,
-            message = "El stock no puede ser negativo"
-    )
+    @NotNull
+    @DecimalMin(value = "0.0", inclusive = false)
+    private BigDecimal costoUnitario;
+    @NotNull
+    @Min(0)
     private Integer stock;
-
-    @NotNull(message = "El estado es obligatorio")
+    @NotNull
+    @Min(0)
+    private Integer stockMinimo;
+    @NotNull
     private Boolean estado;
-
-    @NotNull(message = "La categoría es obligatoria")
-    @Positive(
-            message = "El identificador de categoría debe ser válido"
-    )
+    @NotNull
     private Long categoriaId;
 }

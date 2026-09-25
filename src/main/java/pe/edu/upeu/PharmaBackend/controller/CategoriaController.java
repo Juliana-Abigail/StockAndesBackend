@@ -1,56 +1,58 @@
 package pe.edu.upeu.PharmaBackend.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import pe.edu.upeu.PharmaBackend.dto.CategoriaRequestDTO;
-import pe.edu.upeu.PharmaBackend.dto.CategoriaResponseDTO;
-import pe.edu.upeu.PharmaBackend.service.service.CategoriaService;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import pe.edu.upeu.PharmaBackend.dto.*;
+import pe.edu.upeu.PharmaBackend.service.service.*;
 
 @RestController
+
 @RequestMapping("/api/v1/categorias")
+
 public class CategoriaController {
+    private final CategoriaService s;
+    private final ProductoService ps;
 
-    private final CategoriaService categoriaService;
-
-    public CategoriaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
-    }
-
-    @GetMapping
-    public ResponseEntity<Iterable<CategoriaResponseDTO>> findAll() {
-        return ResponseEntity.ok(categoriaService.readAll());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(categoriaService.read(id));
+    public CategoriaController(CategoriaService s, ProductoService ps) {
+        this.s = s;
+        this.ps = ps;
     }
 
     @PostMapping
-    public ResponseEntity<CategoriaResponseDTO> create(@Valid @RequestBody CategoriaRequestDTO requestDTO) {
-        CategoriaResponseDTO response = categoriaService.create(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+    public ResponseEntity<?> crear(@Valid @RequestBody CategoriaRequestDTO r) {
+        return ResponseEntity.status(201).body(s.create(r));
+    }
+
+    @GetMapping
+
+    public ResponseEntity<?> listar() {
+        return ResponseEntity.ok(s.readAll());
+    }
+
+    @GetMapping("/{id}")
+
+    public ResponseEntity<?> uno(@PathVariable Long id) {
+        return ResponseEntity.ok(s.read(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> update(
-            @PathVariable Long id,
-            @Valid @RequestBody CategoriaRequestDTO requestDTO) {
-        return ResponseEntity.ok(categoriaService.update(id, requestDTO));
+
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO r) {
+        return ResponseEntity.ok(s.update(id, r));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        categoriaService.delete(id);
+
+    public ResponseEntity<Void> borrar(@PathVariable Long id) {
+        s.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/productos")
+
+    public ResponseEntity<?> productos(@PathVariable Long id) {
+        return ResponseEntity.ok(ps.porCategoria(id));
     }
 }

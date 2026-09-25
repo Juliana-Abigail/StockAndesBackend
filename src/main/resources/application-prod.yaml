@@ -1,18 +1,17 @@
 server:
   port: ${SERVER_PORT:8081}
+
 spring:
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: oracle.jdbc.driver.OracleDriver
+    driver-class-name: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.OracleDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
-
     show-sql: false
-
     properties:
       hibernate:
         format_sql: false
@@ -20,6 +19,5 @@ spring:
 springdoc:
   swagger-ui:
     enabled: false
-
   api-docs:
     enabled: false

@@ -7,25 +7,22 @@ import java.time.LocalDateTime;
 
 @Entity
 
-@Table(name = "productos") @Getter @Setter @NoArgsConstructor @AllArgsConstructor public class Producto {
+@Table(name = "detalle_despachos") @Getter @Setter @NoArgsConstructor @AllArgsConstructor public class DetalleDespacho {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true, length = 7)
-    private String codigo;
-    @Column(nullable = false, length = 150)
-    private String nombre;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "despacho_id", nullable = false)
+    private Despacho despacho;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "producto_id", nullable = false)
+    private Producto producto;
+    @Column(nullable = false)
+    private Integer cantidad;
     @Column(name = "costo_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal costoUnitario;
-    @Column(nullable = false)
-    private Integer stock;
-    @Column(name = "stock_minimo", nullable = false)
-    private Integer stockMinimo;
-    @Column(nullable = false)
-    private Boolean estado = true;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal importe;
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
     @Column(name = "fecha_modificacion")
@@ -33,7 +30,6 @@ import java.time.LocalDateTime;
 
     @PrePersist void pre() {
         fechaCreacion = LocalDateTime.now();
-        if (estado==null)estado = true;
     }
 
     @PreUpdate void upd() {

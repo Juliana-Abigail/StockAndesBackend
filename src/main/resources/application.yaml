@@ -1,5 +1,5 @@
 spring:
   application:
-    name: PhamaBackend
+    name: InventarioBackend
   profiles:
     active: dev

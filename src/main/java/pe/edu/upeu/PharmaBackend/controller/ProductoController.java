@@ -1,67 +1,56 @@
 package pe.edu.upeu.PharmaBackend.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import pe.edu.upeu.PharmaBackend.dto.ProductoRequestDTO;
-import pe.edu.upeu.PharmaBackend.dto.ProductoResponseDTO;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import pe.edu.upeu.PharmaBackend.dto.*;
 import pe.edu.upeu.PharmaBackend.service.service.ProductoService;
 
 @RestController
+
 @RequestMapping("/api/v1/productos")
+
 public class ProductoController {
+    private final ProductoService s;
 
-    private final ProductoService productoService;
-
-    public ProductoController(ProductoService productoService) {
-        this.productoService = productoService;
-    }
-
-    @GetMapping
-    public ResponseEntity<Iterable<ProductoResponseDTO>> findAll() {
-        return ResponseEntity.ok(productoService.readAll());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductoResponseDTO> findById(
-            @PathVariable Long id) {
-
-        return ResponseEntity.ok(productoService.read(id));
+    public ProductoController(ProductoService s) {
+        this.s = s;
     }
 
     @PostMapping
-    public ResponseEntity<ProductoResponseDTO> create(
-            @Valid @RequestBody ProductoRequestDTO requestDTO) {
 
-        ProductoResponseDTO response =
-                productoService.create(requestDTO);
+    public ResponseEntity<?> crear(@Valid @RequestBody ProductoRequestDTO r) {
+        return ResponseEntity.status(201).body(s.create(r));
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+    @GetMapping
+
+    public ResponseEntity<?> listar() {
+        return ResponseEntity.ok(s.readAll());
+    }
+
+    @GetMapping("/{id}")
+
+    public ResponseEntity<?> uno(@PathVariable Long id) {
+        return ResponseEntity.ok(s.read(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponseDTO> update(
-            @PathVariable Long id,
-            @Valid @RequestBody ProductoRequestDTO requestDTO) {
 
-        return ResponseEntity.ok(
-                productoService.update(id, requestDTO)
-        );
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody ProductoRequestDTO r) {
+        return ResponseEntity.ok(s.update(id, r));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        productoService.delete(id);
+
+    public ResponseEntity<Void> borrar(@PathVariable Long id) {
+        s.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/buscar")
+
+    public ResponseEntity<?> buscar(@RequestParam(required = false)String nombre, @RequestParam(required = false)Long categoriaId, @RequestParam(required = false)Boolean stockBajo, @RequestParam(defaultValue = "nombre")String orden, @RequestParam(defaultValue = "asc")String dir) {
+        return ResponseEntity.ok(s.buscar(nombre, categoriaId, stockBajo, orden, dir));
     }
 }
